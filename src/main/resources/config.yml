@@ -1,0 +1,31 @@
+permissions:
+  admin: "fepboxquesty.admin"
+  info: "fepboxquesty.info"
+  player-complete-enabled: false
+  player-complete: "fepboxquesty.complete"
+
+messages:
+  prefix: "&8[&bQuesty&8] &7"
+  no-permission: "%prefix%&cBrak uprawnień."
+  player-only: "%prefix%&cTa komenda jest tylko dla gracza."
+  not-found: "%prefix%&cNie znaleziono zadania: &f%quest%&c."
+  created: "%prefix%&aUtworzono zadanie: &f%quest%&a."
+  started: "%prefix%&aRozpoczęto zadanie: &f%quest%&a."
+  already-active: "%prefix%&cMasz juz aktywne zadanie: &f%quest%&c."
+  completed: "%prefix%&aUkonczono zadanie: &f%quest%&a."
+  not-active: "%prefix%&cTo zadanie nie jest aktywne."
+  reward-set: "%prefix%&aUstawiono nagrode nr &f%number%&a dla zadania &f%quest%&a."
+  reward-added: "%prefix%&aDodano nagrode nr &f%number%&a do zadania &f%quest%&a."
+  reward-removed: "%prefix%&aUsunieto nagrode nr &f%number%&a z zadania &f%quest%&a."
+  reward-empty-hand: "%prefix%&cMusisz trzymac przedmiot w rece."
+  reload: "%prefix%&aPrzeladowano konfiguracje."
+  editing-selected: "%prefix%&7Wybrane zadanie do edycji: &f%quest%&7."
+  editing-missing: "%prefix%&cPodaj nazwe zadania lub uzyj najpierw /quest create <nazwa>."
+
+quests:
+  przyklad:
+    enabled: true
+    message:
+      - "&eWymagania zadania:"
+      - "&7- Zrob cos fajnego"
+      - "&7- Wroc po nagrode"

@@ -1,0 +1,19 @@
+name: Fepbox-Questy
+version: 1.0.0
+main: pl.fepbox.questy.FepboxQuestyPlugin
+api-version: '1.21'
+author: Fepbox
+commands:
+  quest:
+    description: Questy
+    usage: /quest
+permissions:
+  fepboxquesty.info:
+    description: Pozwala na /quest info
+    default: true
+  fepboxquesty.admin:
+    description: Administracja questami
+    default: op
+  fepboxquesty.complete:
+    description: Pozwala graczowi na /quest complete (gdy wlaczone w configu)
+    default: true

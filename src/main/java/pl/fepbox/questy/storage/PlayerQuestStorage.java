@@ -38,19 +38,52 @@ public final class PlayerQuestStorage {
         }
     }
 
-    public String getActiveQuest(UUID uuid) {
-        return yml.getString("players." + uuid + ".active");
+    public Set<String> getActiveQuests(UUID uuid) {
+        String base = "players." + uuid + ".active";
+        Object raw = yml.get(base);
+        if (raw instanceof String s) {
+            if (s.isBlank()) return Set.of();
+            Set<String> out = new LinkedHashSet<>();
+            out.add(s);
+            yml.set(base, new ArrayList<>(out));
+            save();
+            return out;
+        }
+        List<String> list = yml.getStringList(base);
+        if (list == null || list.isEmpty()) return Set.of();
+        Set<String> out = new LinkedHashSet<>();
+        for (String q : list) {
+            if (q != null && !q.isBlank()) out.add(q);
+        }
+        return out;
     }
 
-    public void setActiveQuest(UUID uuid, String questName) {
-        String base = "players." + uuid;
-        if (questName == null || questName.isBlank()) {
-            yml.set(base + ".active", null);
-        } else {
-            yml.set(base + ".active", questName);
-            yml.set(base + ".startedAt", System.currentTimeMillis());
-        }
+    public boolean addActiveQuest(UUID uuid, String questName) {
+        if (questName == null || questName.isBlank()) return false;
+        String base = "players." + uuid + ".active";
+        Set<String> set = new LinkedHashSet<>(getActiveQuests(uuid));
+        boolean added = set.add(questName);
+        yml.set(base, new ArrayList<>(set));
+        yml.set("players." + uuid + ".startedAt", System.currentTimeMillis());
         save();
+        return added;
+    }
+
+    public boolean removeActiveQuest(UUID uuid, String questName) {
+        if (questName == null || questName.isBlank()) return false;
+        String base = "players." + uuid + ".active";
+        Set<String> set = new LinkedHashSet<>(getActiveQuests(uuid));
+        boolean removed = set.removeIf(q -> q.equalsIgnoreCase(questName));
+        yml.set(base, new ArrayList<>(set));
+        save();
+        return removed;
+    }
+
+    public boolean isActive(UUID uuid, String questName) {
+        for (String q : getActiveQuests(uuid)) {
+            if (q.equalsIgnoreCase(questName)) return true;
+        }
+        return false;
     }
 
     public boolean isCompleted(UUID uuid, String questName) {

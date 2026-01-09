@@ -1,15 +1,19 @@
 package pl.fepbox.questy.util;
 
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Base64;
 
 public final class ItemStackCodec {
     private ItemStackCodec() {}
 
     public static String encode(ItemStack item) {
-        if (item == null) return "";
+        if (item == null || item.getType().isAir()) return "";
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              BukkitObjectOutputStream oos = new BukkitObjectOutputStream(baos)) {
             oos.writeObject(item);
@@ -22,7 +26,7 @@ public final class ItemStackCodec {
 
     public static ItemStack decode(String base64) {
         if (base64 == null || base64.isBlank()) return null;
-        byte[] data;
+        final byte[] data;
         try {
             data = Base64.getDecoder().decode(base64);
         } catch (IllegalArgumentException e) {
@@ -34,22 +38,8 @@ public final class ItemStackCodec {
             Object o = ois.readObject();
             if (o instanceof ItemStack is) return is;
             return null;
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             return null;
-        }
-    }
-
-    private static final class BukkitObjectOutputStream extends ObjectOutputStream {
-        BukkitObjectOutputStream(OutputStream out) throws IOException {
-            super(out);
-            enableReplaceObject(true);
-        }
-    }
-
-    private static final class BukkitObjectInputStream extends ObjectInputStream {
-        BukkitObjectInputStream(InputStream in) throws IOException {
-            super(in);
-            enableResolveObject(true);
         }
     }
 }

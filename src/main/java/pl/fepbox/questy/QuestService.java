@@ -2,6 +2,7 @@ package pl.fepbox.questy;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import pl.fepbox.questy.model.Requirement;
 import pl.fepbox.questy.storage.PlayerQuestStorage;
 import pl.fepbox.questy.storage.QuestStorage;
 
@@ -19,10 +20,10 @@ public final class QuestService {
     }
 
     public boolean canComplete(Player p, String questName) {
-        List<ItemStack> req = quests.getRequirements(questName);
+        List<Requirement> req = quests.getRequirements(questName);
         if (req.isEmpty()) return true;
-        for (ItemStack r : req) {
-            if (!hasEnough(p, r)) return false;
+        for (Requirement r : req) {
+            if (!hasEnough(p, r.item(), r.amount())) return false;
         }
         return true;
     }
@@ -32,10 +33,10 @@ public final class QuestService {
 
         if (requireRequirements && !canComplete(p, questName)) return false;
 
-        List<ItemStack> req = quests.getRequirements(questName);
-        if (requireRequirements && !req.isEmpty()) {
-            for (ItemStack r : req) {
-                removeExact(p, r);
+        if (requireRequirements) {
+            List<Requirement> req = quests.getRequirements(questName);
+            for (Requirement r : req) {
+                removeExact(p, r.item(), r.amount());
             }
         }
 
@@ -56,28 +57,27 @@ public final class QuestService {
         return true;
     }
 
-    private boolean hasEnough(Player p, ItemStack need) {
-        int remaining = need.getAmount();
-        if (remaining <= 0) return true;
+    private boolean hasEnough(Player p, ItemStack template, int amount) {
+        int remaining = amount;
         ItemStack[] contents = p.getInventory().getContents();
         for (ItemStack it : contents) {
             if (it == null || it.getType().isAir()) continue;
-            if (!it.isSimilar(need)) continue;
+            if (!it.isSimilar(template)) continue;
             remaining -= it.getAmount();
             if (remaining <= 0) return true;
         }
         return false;
     }
 
-    private void removeExact(Player p, ItemStack need) {
-        int remaining = need.getAmount();
+    private void removeExact(Player p, ItemStack template, int amount) {
+        int remaining = amount;
         if (remaining <= 0) return;
 
         ItemStack[] contents = p.getInventory().getContents();
         for (int i = 0; i < contents.length; i++) {
             ItemStack it = contents[i];
             if (it == null || it.getType().isAir()) continue;
-            if (!it.isSimilar(need)) continue;
+            if (!it.isSimilar(template)) continue;
 
             int take = Math.min(remaining, it.getAmount());
             int newAmount = it.getAmount() - take;

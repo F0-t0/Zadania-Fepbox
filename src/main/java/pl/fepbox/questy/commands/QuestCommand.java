@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.fepbox.questy.QuestService;
 import pl.fepbox.questy.config.ConfigManager;
+import pl.fepbox.questy.model.Requirement;
 import pl.fepbox.questy.storage.PlayerQuestStorage;
 import pl.fepbox.questy.storage.QuestStorage;
 import pl.fepbox.questy.util.Color;
@@ -276,22 +277,19 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                     send(sender, cfg.msg("not-found").replace("%quest%", quest));
                     return true;
                 }
-                List<ItemStack> req = quests.getRequirements(quest);
+                List<Requirement> req = quests.getRequirements(quest);
                 send(sender, cfg.msg("requirement-list-header").replace("%quest%", quest));
                 if (req.isEmpty()) {
                     send(sender, cfg.msg("requirement-none"));
                     return true;
                 }
                 for (int i = 0; i < req.size(); i++) {
-                    ItemStack it = req.get(i);
-                    if (it == null) continue;
-                    String name = it.getType().name();
-                    int amount = it.getAmount();
+                    Requirement r = req.get(i);
                     send(sender, cfg.msg("requirement-line")
                             .replace("%quest%", quest)
                             .replace("%number%", String.valueOf(i + 1))
-                            .replace("%item%", name)
-                            .replace("%amount%", String.valueOf(amount)));
+                            .replace("%item%", r.item().getType().name())
+                            .replace("%amount%", String.valueOf(r.amount())));
                 }
                 return true;
             }
@@ -299,10 +297,11 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
             if (mode.equals("add")) {
                 int amount = -1;
                 String quest;
+
                 if (args.length >= 3) {
-                    Integer maybe = tryInt(args[2]);
-                    if (maybe != null) {
-                        amount = maybe;
+                    Integer maybeAmount = tryInt(args[2]);
+                    if (maybeAmount != null) {
+                        amount = maybeAmount;
                         quest = args.length >= 4 ? args[3] : selectedForEdit.get(p.getUniqueId());
                     } else {
                         quest = args[2];
@@ -326,10 +325,12 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                ItemStack req = hand.clone();
-                if (amount > 0) req.setAmount(amount);
+                int finalAmount = amount > 0 ? amount : Math.max(1, hand.getAmount());
+                ItemStack template = hand.clone();
+                template.setAmount(1);
+
                 quests.create(quest);
-                int n = quests.addRequirement(quest, req);
+                int n = quests.addRequirement(quest, template, finalAmount);
                 send(sender, cfg.msg("requirement-added").replace("%quest%", quest).replace("%number%", String.valueOf(n)));
                 return true;
             }
@@ -344,6 +345,7 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                     send(sender, "%prefix%&cNumer musi byc liczba >= 1.");
                     return true;
                 }
+
                 int amount = -1;
                 String quest;
 
@@ -374,10 +376,12 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                ItemStack req = hand.clone();
-                if (amount > 0) req.setAmount(amount);
+                int finalAmount = amount > 0 ? amount : Math.max(1, hand.getAmount());
+                ItemStack template = hand.clone();
+                template.setAmount(1);
+
                 quests.create(quest);
-                quests.setRequirement(quest, number, req);
+                quests.setRequirement(quest, number, template, finalAmount);
                 send(sender, cfg.msg("requirement-set").replace("%quest%", quest).replace("%number%", String.valueOf(number)));
                 return true;
             }

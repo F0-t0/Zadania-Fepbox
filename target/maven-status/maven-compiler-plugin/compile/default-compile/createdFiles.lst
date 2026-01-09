@@ -1,9 +1,11 @@
 pl\fepbox\questy\storage\QuestStorage.class
-pl\fepbox\questy\FepboxQuestyPlugin.class
 pl\fepbox\questy\config\ConfigManager.class
-pl\fepbox\questy\util\Color.class
 pl\fepbox\questy\model\QuestDefinition.class
 pl\fepbox\questy\storage\PlayerQuestStorage.class
 pl\fepbox\questy\util\ItemStackCodec.class
+pl\fepbox\questy\QuestService.class
+pl\fepbox\questy\FepboxQuestyPlugin.class
+pl\fepbox\questy\util\Color.class
+pl\fepbox\questy\model\Requirement.class
 fepbox\plugin\questy\Questy.class
 pl\fepbox\questy\commands\QuestCommand.class

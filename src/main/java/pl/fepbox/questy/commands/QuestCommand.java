@@ -156,6 +156,15 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                 send(sender, cfg.msg("not-found").replace("%quest%", quest));
                 return true;
             }
+            if (players.isActive(p.getUniqueId(), quest)) {
+                send(sender, cfg.msg("already-started"));
+                return true;
+            }
+
+            if (!service.canStart(p, quest)) {
+                send(sender, cfg.msg("limit-reached"));
+                return true;
+            }
             players.addActiveQuest(p.getUniqueId(), quest);
             send(sender, cfg.msg("started").replace("%quest%", quest));
             List<String> lines = cfg.cfg().getStringList("quests." + quest + ".message");
@@ -438,17 +447,20 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            boolean ok = service.complete(p, quest, true);
-            if (!ok) {
-                if (!players.isActive(p.getUniqueId(), quest)) {
+            QuestService.CompleteStatus st = service.complete(p, quest, true);
+            if (st != QuestService.CompleteStatus.SUCCESS) {
+                if (st == QuestService.CompleteStatus.NOT_ACTIVE) {
                     send(sender, cfg.msg("not-active"));
-                } else {
+                } else if (st == QuestService.CompleteStatus.REQUIREMENTS_NOT_MET) {
                     send(sender, cfg.msg("requirements-not-met"));
+                } else {
+                    send(sender, cfg.msg("limit-reached"));
                 }
                 return true;
             }
 
             send(sender, cfg.msg("completed").replace("%quest%", quest));
+            send(sender, cfg.cfg().getStringList("messages.completed-lines"), quest);
             return true;
         }
 
@@ -478,6 +490,7 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
         if (c.isConfigurationSection(base)) return;
         c.createSection(base);
         c.set(base + ".enabled", true);
+        c.set(base + ".completion-limit", 1);
         c.set(base + ".requirements", List.of());
         c.set(base + ".message", List.of("&eWymagania zadania:", "&7- (uzupelnij w config.yml)"));
     }

@@ -23,7 +23,7 @@ public final class FepboxQuestyPlugin extends JavaPlugin {
         cfg = new ConfigManager(this);
         quests = new QuestStorage(this);
         players = new PlayerQuestStorage(this);
-        service = new QuestService(quests, players);
+        service = new QuestService(cfg, quests, players);
 
         QuestCommand cmd = new QuestCommand(this, cfg, quests, players, service);
         var pluginCommand = getCommand("quest");

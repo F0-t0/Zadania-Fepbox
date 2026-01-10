@@ -16,6 +16,7 @@ messages:
   created: "%prefix%&aUtworzono zadanie: &f%quest%&a."
   started: "%prefix%&aRozpoczęto zadanie: &f%quest%&a."
   already-active: "%prefix%&cMasz juz aktywne zadanie: &f%quest%&c."
+  already-started: "%prefix%&cMasz juz rozpoczęte to zadanie."
   completed: "%prefix%&aUkonczono zadanie: &f%quest%&a."
   not-active: "%prefix%&cTo zadanie nie jest aktywne."
   reward-set: "%prefix%&aUstawiono nagrode nr &f%number%&a dla zadania &f%quest%&a."
@@ -29,6 +30,7 @@ messages:
   requirement-line: "%prefix%&7- &f#%number% &7%item% &8x&f%amount%"
   requirement-none: "%prefix%&7Brak wymaganych przedmiotow."
   requirements-not-met: "%prefix%&cNie spelniles wymagan tego zadania."
+  limit-reached: "%prefix%&cOsiagnales limit wykonan tego zadania."
   reload: "%prefix%&aPrzeladowano konfiguracje."
   editing-selected: "%prefix%&7Wybrane zadanie do edycji: &f%quest%&7."
   editing-missing: "%prefix%&cPodaj nazwe zadania lub uzyj najpierw /quest create <nazwa>."
@@ -36,6 +38,7 @@ messages:
 quests:
   przyklad:
     enabled: true
+    completion-limit: 1
     requirements: []
     message:
       - "&eWymagania zadania:"

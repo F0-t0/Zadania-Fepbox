@@ -86,12 +86,15 @@ public final class PlayerQuestStorage {
         return false;
     }
 
-    public boolean isCompleted(UUID uuid, String questName) {
-        return yml.getBoolean("players." + uuid + ".completed." + questName, false);
+    public int getCompletionCount(UUID uuid, String questName) {
+        return yml.getInt("players." + uuid + ".completionCount." + questName, 0);
     }
 
-    public void setCompleted(UUID uuid, String questName, boolean value) {
-        yml.set("players." + uuid + ".completed." + questName, value);
+    public int incrementCompletionCount(UUID uuid, String questName) {
+        String path = "players." + uuid + ".completionCount." + questName;
+        int next = Math.max(0, yml.getInt(path, 0)) + 1;
+        yml.set(path, next);
         save();
+        return next;
     }
 }

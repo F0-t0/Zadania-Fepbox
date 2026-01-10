@@ -2,6 +2,7 @@ package pl.fepbox.questy;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import pl.fepbox.questy.config.ConfigManager;
 import pl.fepbox.questy.model.Requirement;
 import pl.fepbox.questy.storage.PlayerQuestStorage;
 import pl.fepbox.questy.storage.QuestStorage;
@@ -11,10 +12,19 @@ import java.util.Map;
 
 public final class QuestService {
 
+    public enum CompleteStatus {
+        SUCCESS,
+        NOT_ACTIVE,
+        REQUIREMENTS_NOT_MET,
+        LIMIT_REACHED
+    }
+
+    private final ConfigManager cfg;
     private final QuestStorage quests;
     private final PlayerQuestStorage players;
 
-    public QuestService(QuestStorage quests, PlayerQuestStorage players) {
+    public QuestService(ConfigManager cfg, QuestStorage quests, PlayerQuestStorage players) {
+        this.cfg = cfg;
         this.quests = quests;
         this.players = players;
     }
@@ -28,10 +38,23 @@ public final class QuestService {
         return true;
     }
 
-    public boolean complete(Player p, String questName, boolean requireRequirements) {
-        if (!players.isActive(p.getUniqueId(), questName)) return false;
+    public boolean canStart(Player p, String questName) {
+        int limit = completionLimit(questName);
+        if (limit <= 0) return true;
+        int done = players.getCompletionCount(p.getUniqueId(), questName);
+        return done < limit;
+    }
 
-        if (requireRequirements && !canComplete(p, questName)) return false;
+    public CompleteStatus complete(Player p, String questName, boolean requireRequirements) {
+        if (!players.isActive(p.getUniqueId(), questName)) return CompleteStatus.NOT_ACTIVE;
+
+        int limit = completionLimit(questName);
+        if (limit > 0) {
+            int done = players.getCompletionCount(p.getUniqueId(), questName);
+            if (done >= limit) return CompleteStatus.LIMIT_REACHED;
+        }
+
+        if (requireRequirements && !canComplete(p, questName)) return CompleteStatus.REQUIREMENTS_NOT_MET;
 
         if (requireRequirements) {
             List<Requirement> req = quests.getRequirements(questName);
@@ -53,8 +76,12 @@ public final class QuestService {
         }
 
         players.removeActiveQuest(p.getUniqueId(), questName);
-        players.setCompleted(p.getUniqueId(), questName, true);
-        return true;
+        players.incrementCompletionCount(p.getUniqueId(), questName);
+        return CompleteStatus.SUCCESS;
+    }
+
+    private int completionLimit(String questName) {
+        return cfg.cfg().getInt("quests." + questName + ".completion-limit", 1);
     }
 
     private boolean hasEnough(Player p, ItemStack template, int amount) {

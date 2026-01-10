@@ -18,6 +18,9 @@ messages:
   already-active: "%prefix%&cMasz juz aktywne zadanie: &f%quest%&c."
   already-started: "%prefix%&cMasz juz rozpoczęte to zadanie."
   completed: "%prefix%&aUkonczono zadanie: &f%quest%&a."
+  completed-lines:
+    - "%prefix%&aZadanie &f%quest% &azostalo ukonczone!"
+    - "%prefix%&7Otrzymales nagrode."
   not-active: "%prefix%&cTo zadanie nie jest aktywne."
   reward-set: "%prefix%&aUstawiono nagrode nr &f%number%&a dla zadania &f%quest%&a."
   reward-added: "%prefix%&aDodano nagrode nr &f%number%&a do zadania &f%quest%&a."

@@ -8,6 +8,9 @@ import pl.fepbox.questy.commands.QuestCommand;
 import pl.fepbox.questy.config.ConfigManager;
 import pl.fepbox.questy.storage.PlayerQuestStorage;
 import pl.fepbox.questy.storage.QuestStorage;
+import pl.fepbox.questy.util.Color;
+
+import java.util.List;
 
 public final class FepboxQuestyPlugin extends JavaPlugin {
 
@@ -37,26 +40,52 @@ public final class FepboxQuestyPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (checkTask != null) checkTask.cancel();
+        if (checkTask != null) {
+            checkTask.cancel();
+            checkTask = null;
+        }
     }
 
     private void startChecker() {
-        if (checkTask != null) checkTask.cancel();
+        if (checkTask != null) {
+            checkTask.cancel();
+            checkTask = null;
+        }
+
         int seconds = Math.max(1, cfg.cfg().getInt("completion.check-every-seconds", 10));
         long periodTicks = seconds * 20L;
 
         checkTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
-            boolean manualOnly = cfg.cfg().getBoolean("completion.manual-only", false);
-            if (manualOnly) return;
+            if (cfg.cfg().getBoolean("completion.manual-only", false)) return;
 
             for (Player p : Bukkit.getOnlinePlayers()) {
                 for (String quest : players.getActiveQuests(p.getUniqueId())) {
                     if (quest == null || quest.isBlank()) continue;
-                    if (service.canComplete(p, quest)) {
-                        service.complete(p, quest, true);
+                    if (!service.canComplete(p, quest)) continue;
+
+                    QuestService.CompleteStatus st = service.complete(p, quest, true);
+                    if (st == QuestService.CompleteStatus.SUCCESS) {
+                        sendCompletedMessages(p, quest);
                     }
                 }
             }
         }, periodTicks, periodTicks);
+    }
+
+    private void sendCompletedMessages(Player p, String quest) {
+        String prefix = cfg.msg("prefix");
+        String base = cfg.msg("completed").replace("%prefix%", prefix).replace("%quest%", quest);
+        if (base != null && !base.isBlank()) {
+            p.sendMessage(Color.c(base));
+        }
+
+        List<String> lines = cfg.cfg().getStringList("messages.completed-lines");
+        if (lines == null || lines.isEmpty()) return;
+
+        for (String l : lines) {
+            if (l == null || l.isBlank()) continue;
+            String x = l.replace("%prefix%", prefix).replace("%quest%", quest);
+            p.sendMessage(Color.c(x));
+        }
     }
 }
